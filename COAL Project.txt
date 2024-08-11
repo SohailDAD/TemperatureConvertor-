@@ -1,0 +1,188 @@
+INCLUDE Irvine32.inc
+
+.data
+    totalSubjects DWORD ?
+    totalCredits DWORD 0
+    totalGradePoints DWORD 0
+    grade REAL4  ?
+    credits DWORD ?
+    cgpa DWORD ?
+
+.code
+main PROC
+
+    mov edx, OFFSET promptSubjects
+    call WriteString
+    call ReadInt
+    mov totalSubjects, eax
+
+    mov ecx, 1 ; Loop counter for subjects
+
+calculateCGPA:
+    ; Input grade
+    mov edx, OFFSET promptGrade
+    call WriteString
+    call ReadFloat
+    mov grade, eax ; Store the grade
+
+    ; Input credit hours
+    mov edx, OFFSET promptCredits
+    call WriteString
+    call ReadInt
+    mov credits, eax ; Store the credit hours
+
+    ; Calculate totalGradePoints += grade * credits
+    mov eax, grade
+    imul eax, credits
+    add eax, totalGradePoints
+    mov totalGradePoints, eax
+
+    ; Calculate totalCredits += credits
+    mov eax, totalCredits
+    add eax, credits
+    mov totalCredits, eax
+
+    inc ecx ; Increment loop counter
+    cmp ecx, totalSubjects
+    jle calculateCGPA ; Continue looping if ecx is less than totalSubjects
+
+    ; Calculate CGPA = totalGradePoints / totalCredits
+    mov eax, totalGradePoints
+    xor edx, edx ; Clear edx to zero-extend eax
+    mov ebx, totalCredits
+    div ebx
+    mov cgpa, eax
+
+    ; Output CGPA
+    mov edx, OFFSET resultMessage
+    call WriteString
+    mov eax, cgpa
+    call Writefloat
+    call Crlf
+
+    exit
+main ENDP
+
+promptSubjects BYTE "Enter the total number of subjects: ", 0
+promptGrade BYTE "Enter grade for subject (on a scale of 0 to 4): ", 0
+promptCredits BYTE "Enter credit hours for subject: ", 0
+resultMessage BYTE "Your CGPA is: ", 0
+
+END main
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------
+
+
+
+
+INCLUDE Irvine32.inc
+
+.data
+    choice DWORD ?
+    temperature REAL4 ?
+
+.code
+main PROC
+    mov edx, OFFSET menuMsg
+    call WriteString
+    call crlf
+    call ReadInt
+    mov choice, eax
+
+    cmp choice, 1
+    je  convertCelsiusToFahrenheit
+    cmp choice, 2
+    je  convertFahrenheitToCelsius
+    jmp invalidChoice
+
+convertCelsiusToFahrenheit:
+    mov edx, OFFSET celsiusMsg
+    call WriteString
+    call Readint
+    mov temperature, eax
+    call Crlf
+    ;call writeint
+    mov eax, temperature
+    call CelsiusToFahrenheit
+    mov edx, OFFSET resultMsg
+    call WriteString
+    mov eax, temperature
+    call WriteDec
+    call crlf
+    jmp exitProgram
+
+convertFahrenheitToCelsius:
+    mov edx, OFFSET fahrenheitMsg
+    call WriteString
+    call Readint
+    mov temperature, eax
+    call Crlf
+    mov eax, temperature
+    call FahrenheitToCelsius
+    mov edx, OFFSET resultMsg
+    call WriteString
+    mov eax, temperature
+    call WriteDec
+    call crlf
+    jmp exitProgram
+
+invalidChoice:
+    mov edx, OFFSET invalidChoiceMsg
+    call WriteString
+
+exitProgram:
+    call WaitMsg
+    call ExitProcess
+
+main ENDP
+
+CelsiusToFahrenheit PROC
+    mov ebx,5
+    mov ecx,9
+    mov eax ,temperature 
+    mul ecx
+    div ebx
+    add eax,32
+    mov temperature,eax
+    
+    ret
+CelsiusToFahrenheit ENDP
+
+FahrenheitToCelsius PROC
+    mov ebx,5
+    mov ecx,9
+    mov eax ,temperature
+    sub eax,32
+    mul ebx
+    div ecx
+    mov temperature,eax
+    ret
+FahrenheitToCelsius ENDP
+
+menuMsg             BYTE "Temperature Converter (T to C)-->1 / (C to T)-->2 :", 0
+celsiusMsg          BYTE "Enter temperature in Celsius: ", 0
+fahrenheitMsg       BYTE "Enter temperature in Fahrenheit: ", 0
+resultMsg           BYTE "Equivalent temperature: ", 0
+invalidChoiceMsg    BYTE "Invalid choice. Please enter 1 or 2.", 0
+
+
+END main
+
